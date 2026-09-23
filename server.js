@@ -7,6 +7,8 @@ dotenv.config();
 connectDB();
 
 const app = express();
+const heroRoutes = require("./routes/heroRoutes");
+const path = require("path");
 
 app.use(cors({
   origin: "http://localhost:3000", // your Next.js frontend
@@ -17,6 +19,8 @@ app.use(express.json());
 
 // Routes
 app.use("/api/admin", require("./routes/adminAuth"));
+app.use("/api/hero", heroRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Test route
 app.get("/", (req, res) => {
