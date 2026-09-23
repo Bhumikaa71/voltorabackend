@@ -27,9 +27,13 @@ exports.createHeroSlide = async (req, res) => {
   try {
     const data = { ...req.body };
 
-    // If a file was uploaded
+    // 1. Priority: File upload
     if (req.file) {
       data.image = `/uploads/hero/${req.file.filename}`;
+    }
+    // 2. If no file, but image URL was sent
+    else if (req.body.image && req.body.image.startsWith("http")) {
+      data.image = req.body.image;
     }
 
     // Convert string "true"/"false" to boolean
@@ -37,6 +41,11 @@ exports.createHeroSlide = async (req, res) => {
       data.isActive = data.isActive === "true" || data.isActive === true;
     }
     if (data.order) data.order = Number(data.order);
+
+    // Validation: image is required
+    if (!data.image) {
+      return res.status(400).json({ message: "Image is required (upload or URL)" });
+    }
 
     const slide = await HeroSlide.create(data);
     res.status(201).json(slide);
@@ -57,7 +66,7 @@ exports.updateHeroSlide = async (req, res) => {
 
     const data = { ...req.body };
 
-    // If new image uploaded → delete old one
+    // 1. New file uploaded → delete old local file
     if (req.file) {
       if (slide.image && slide.image.startsWith("/uploads/")) {
         const oldPath = path.join(__dirname, "..", slide.image);
@@ -67,6 +76,17 @@ exports.updateHeroSlide = async (req, res) => {
       }
       data.image = `/uploads/hero/${req.file.filename}`;
     }
+    // 2. Image URL sent → use it (and delete old local file if exists)
+    else if (req.body.image && req.body.image.startsWith("http")) {
+      if (slide.image && slide.image.startsWith("/uploads/")) {
+        const oldPath = path.join(__dirname, "..", slide.image);
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
+      }
+      data.image = req.body.image;
+    }
+    // 3. No new image → keep the existing one (don't overwrite)
 
     if (data.isActive !== undefined) {
       data.isActive = data.isActive === "true" || data.isActive === true;
@@ -93,7 +113,7 @@ exports.deleteHeroSlide = async (req, res) => {
     const slide = await HeroSlide.findById(req.params.id);
     if (!slide) return res.status(404).json({ message: "Slide not found" });
 
-    // Delete image file
+    // Delete image file only if it is a local upload
     if (slide.image && slide.image.startsWith("/uploads/")) {
       const imagePath = path.join(__dirname, "..", slide.image);
       if (fs.existsSync(imagePath)) {
