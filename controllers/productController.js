@@ -36,6 +36,25 @@ exports.getCategories = async (req, res) => {
   }
 };
 
+// GET deals (products with discount)
+exports.getDeals = async (req, res) => {
+  try {
+    const products = await Product.find({
+      isActive: true,
+      oldPrice: { $exists: true, $gt: 0 },
+    }).sort({ createdAt: -1 });
+
+    // Only products where oldPrice > price
+    const deals = products.filter(
+      (p) => p.oldPrice && p.oldPrice > p.price
+    );
+
+    res.status(200).json(deals);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // GET single product
 exports.getProductById = async (req, res) => {
   try {
