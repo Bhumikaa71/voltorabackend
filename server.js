@@ -21,6 +21,7 @@ app.use(express.json());
 app.use("/api/admin", require("./routes/adminAuth"));
 app.use("/api/hero", heroRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/products", require("./routes/productRoutes"));
 
 // Test route
 app.get("/", (req, res) => {
