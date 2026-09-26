@@ -20,9 +20,11 @@ const productSchema = new mongoose.Schema(
     freeShipping: { type: Boolean, default: false },
     freeGift: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
-
-    // NEW – deal countdown end time
     dealEndsAt: { type: Date, default: null },
+
+    // Landing page flags
+    isBestSeller: { type: Boolean, default: false },
+    isNewArrival: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

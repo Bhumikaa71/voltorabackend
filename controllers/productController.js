@@ -3,7 +3,17 @@ const Product = require("../models/Product");
 // GET all products (public)
 exports.getProducts = async (req, res) => {
   try {
-    const { category, brand, min, max, search, stock } = req.query;
+    const {
+      category,
+      brand,
+      min,
+      max,
+      search,
+      stock,
+      bestSeller,
+      newArrival,
+    } = req.query;
+
     const filter = { isActive: true };
 
     if (category) filter.category = category;
@@ -15,6 +25,9 @@ exports.getProducts = async (req, res) => {
       if (min) filter.price.$gte = Number(min);
       if (max) filter.price.$lte = Number(max);
     }
+
+    if (bestSeller === "true") filter.isBestSeller = true;
+    if (newArrival === "true") filter.isNewArrival = true;
 
     const products = await Product.find(filter).sort({ createdAt: -1 });
     res.status(200).json(products);
@@ -36,7 +49,7 @@ exports.getCategories = async (req, res) => {
   }
 };
 
-// GET deals (products with discount)
+// GET deals
 exports.getDeals = async (req, res) => {
   try {
     const products = await Product.find({
@@ -44,11 +57,7 @@ exports.getDeals = async (req, res) => {
       oldPrice: { $exists: true, $gt: 0 },
     }).sort({ createdAt: -1 });
 
-    // Only products where oldPrice > price
-    const deals = products.filter(
-      (p) => p.oldPrice && p.oldPrice > p.price
-    );
-
+    const deals = products.filter((p) => p.oldPrice && p.oldPrice > p.price);
     res.status(200).json(deals);
   } catch (error) {
     res.status(500).json({ message: error.message });
