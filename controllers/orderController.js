@@ -6,7 +6,7 @@ exports.createOrder = async (req, res) => {
     const { shippingAddress, paymentMethod = "COD" } = req.body;
     const user = await User.findById(req.user._id).populate("cart.product");
 
-    if (!user.cart || !user.cart.length) {
+    if (!user.cart || user.cart.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
@@ -38,6 +38,7 @@ exports.createOrder = async (req, res) => {
       shippingAddress: shippingAddress || {},
       paymentMethod: method,
       paymentStatus: "Pending",
+      status: "Pending",
     });
 
     user.cart = [];
@@ -45,6 +46,7 @@ exports.createOrder = async (req, res) => {
 
     res.status(201).json(order);
   } catch (error) {
+    console.error("createOrder error:", error);
     res.status(400).json({ message: error.message });
   }
 };

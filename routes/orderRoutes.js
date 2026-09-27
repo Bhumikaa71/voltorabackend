@@ -9,12 +9,10 @@ const {
   updateOrderStatus,
 } = require("../controllers/orderController");
 
-// User (must be logged in)
 router.post("/", protect, createOrder);
 router.get("/my", protect, getMyOrders);
 router.get("/my/:id", protect, getOrderById);
 
-// Admin
 router.get("/admin/all", getAllOrdersAdmin);
 router.put("/admin/:id/status", updateOrderStatus);
 
