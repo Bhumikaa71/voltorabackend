@@ -17,3 +17,4 @@ router.delete("/:productId", removeFromCart);
 router.delete("/", clearCart);
 
 module.exports = router;
+// cart routes 
